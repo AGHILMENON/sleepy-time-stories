@@ -1,0 +1,17 @@
+﻿# Secrets
+.env
+*.pem
+service-account*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.expo/
