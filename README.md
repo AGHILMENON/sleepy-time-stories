@@ -44,4 +44,4 @@ Week 1 in progress.
 
 ## Author
 
-Aghil Menon Udayakumaran, AI Project Manager.
+Aghil Menon Udayakumaran, AI Specialist.
