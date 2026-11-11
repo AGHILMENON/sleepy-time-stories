@@ -1,23 +1,25 @@
-from fastapi import FastAPI
-from typing import Literal
-from pydantic import BaseModel
+from fastapi import Depends, FastAPI, HTTPException
+
+from app.llm import OllamaLLM
+from app.models import StoryRequest
+from app.writer import write_story
 
 app = FastAPI(title="Sleepy Time Stories - Agent API")
-class StoryRequest(BaseModel):
-    model_config = {"extra": "forbid"}
-    age_band: Literal["3-4", "5-6", "7-8"]
-    hero: Literal["elephant", "owl", "turtle", "bunny"]
-    place: Literal["forest", "seaside", "starry_sky"]
-    minutes: Literal[5, 10, 15]
+
+
+def get_llm():
+    """Which AI plug the app uses. Tests replace this with FakeLLM."""
+    return OllamaLLM("qwen3:8b")
+
 
 @app.get("/healthz")
 def healthz():
     return {"ok": True}
 
+
 @app.post("/stories")
-def create_story(req: StoryRequest):
-    return {
-        "title": f"The {req.hero.title()} in the {req.place.replace('_', ' ')}",
-        "text": f"Once upon a time, a sleepy {req.hero}... Goodnight, {{CHILD}}.",
-        "minutes": req.minutes,
-    }
+def create_story(req: StoryRequest, llm=Depends(get_llm)):
+    try:
+        return write_story(llm, req)
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=str(e))
