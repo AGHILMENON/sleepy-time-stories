@@ -1,15 +1,18 @@
 from fastapi import Depends, FastAPI, HTTPException
 
+from app.agent import generate_story
 from app.llm import OllamaLLM
 from app.models import StoryRequest
-from app.writer import write_story
 
 app = FastAPI(title="Sleepy Time Stories - Agent API")
 
 
-def get_llm():
-    """Which AI plug the app uses. Tests replace this with FakeLLM."""
+def get_writer():
     return OllamaLLM("qwen3:8b")
+
+
+def get_reviewer():
+    return OllamaLLM("qwen3:14b")
 
 
 @app.get("/healthz")
@@ -18,8 +21,8 @@ def healthz():
 
 
 @app.post("/stories")
-def create_story(req: StoryRequest, llm=Depends(get_llm)):
+def create_story(req: StoryRequest, writer=Depends(get_writer), reviewer=Depends(get_reviewer)):
     try:
-        return write_story(llm, req)
+        return generate_story(writer, reviewer, req)
     except ValueError as e:
         raise HTTPException(status_code=502, detail=str(e))

@@ -4,7 +4,7 @@ from app.prompts import WORDS_PER_MINUTE, WRITER
 MOODS = {"forest", "rain", "waves", "night"}
 
 
-def write_story(llm, req: StoryRequest) -> dict:
+def write_story(llm, req: StoryRequest, fix_notes: str = "") -> dict:
     """Ask the AI for one story and return a clean result."""
     words = req.minutes * WORDS_PER_MINUTE
 
@@ -16,7 +16,10 @@ def write_story(llm, req: StoryRequest) -> dict:
         words=words,
     )
 
-    draft = llm.complete_json(system, "Write tonight's story.")
+    request = "Write tonight's story."
+    if fix_notes:
+        request += f" The last draft was rejected. Fix this: {fix_notes}"
+    draft = llm.complete_json(system, request)
 
     story = draft.get("story", "").strip()
     if not story:
