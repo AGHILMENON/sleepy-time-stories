@@ -9,7 +9,7 @@ def test_child_placeholder_is_never_spoken():
 def test_narrate_saves_wav_and_reports_duration(tmp_path):
     voice = FakeVoice()
     story = {"title": "Owl's Quiet Night", "text": "The owl yawned. Goodnight, {CHILD}."}
-    result = narrate(voice, story, out_dir=str(tmp_path))
+    result = narrate(voice, story, out_dir=str(tmp_path), music_dir=tmp_path)
 
     assert result["audio_path"].endswith("Owl_s_Quiet_Night.wav")
     assert (tmp_path / "Owl_s_Quiet_Night.wav").exists()
@@ -41,3 +41,14 @@ def test_music_is_ducked_under_voice():
     track = mix(voice, music)
     middle_of_story = 5 * SAMPLE_RATE + 5 * SAMPLE_RATE
     assert abs(track[middle_of_story] - MUSIC_UNDER) < 0.01
+
+def test_narrate_mixes_music_when_available(tmp_path):
+    import soundfile as sf
+    sf.write(tmp_path / "night.wav", np.zeros(SAMPLE_RATE, dtype=np.float32), SAMPLE_RATE)
+    (tmp_path / "night.mp3").write_bytes((tmp_path / "night.wav").read_bytes())
+
+    story = {"title": "Owl", "text": "The owl yawned.", "music_mood": "night"}
+    result = narrate(FakeVoice(), story, out_dir=str(tmp_path), music_dir=tmp_path)
+
+    assert result["music"] == "night.mp3"
+    assert result["duration_seconds"] == 5 + OUTRO_SECONDS     # 5 s intro + 0.3 s voice + 60 s outro, rounded

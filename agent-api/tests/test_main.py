@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
 
 from app.llm import FakeLLM
-from app.main import app, get_reviewer, get_writer
+from app.main import app, get_reviewer, get_voice, get_writer
+from app.voice import FakeVoice
 
 client = TestClient(app)
 
@@ -22,6 +23,7 @@ def use_fakes(drafts, reviews):
     writer, reviewer = FakeLLM(drafts), FakeLLM(reviews)
     app.dependency_overrides[get_writer] = lambda: writer
     app.dependency_overrides[get_reviewer] = lambda: reviewer
+    app.dependency_overrides[get_voice] = lambda: FakeVoice()
     return writer, reviewer
 
 
@@ -73,3 +75,10 @@ def test_child_name_never_reaches_the_ai():
     writer, _ = use_fakes([draft()], [review()])
     client.post("/stories", json=VALID)
     assert "{CHILD}" in writer.calls[0][0]
+
+def test_story_comes_with_audio_url():
+    use_fakes([draft()], [review()])
+    body = client.post("/stories", json=VALID).json()
+    assert body["audio_url"].startswith("/audio/")
+    assert body["audio_url"].endswith(".wav")
+    assert body["duration_seconds"] > 0
