@@ -3,3 +3,6 @@ uvicorn
 httpx
 pytest==8.3.5
 langgraph
+numpy
+soundfile
+kokoro
