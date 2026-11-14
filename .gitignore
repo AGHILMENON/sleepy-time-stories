@@ -18,3 +18,4 @@ build/
 agent-api/try_*.py
 agent-api/audio/
 *.wav
+agent-api/music/*.mp3
