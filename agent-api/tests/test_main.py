@@ -82,3 +82,14 @@ def test_story_comes_with_audio_url():
     assert body["audio_url"].startswith("/audio/")
     assert body["audio_url"].endswith(".wav")
     assert body["duration_seconds"] > 0
+
+def test_theme_reaches_writer_prompt():
+    writer, _ = use_fakes([draft()], [review()])
+    client.post("/stories", json={**VALID, "theme": "not scared of the dark"})
+    assert "not scared of the dark" in writer.calls[0][0]
+
+
+def test_overlong_theme_rejected():
+    use_fakes([], [])
+    r = client.post("/stories", json={**VALID, "theme": "x" * 200})
+    assert r.status_code == 422

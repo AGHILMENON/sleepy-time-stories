@@ -14,6 +14,7 @@ def write_story(llm, req: StoryRequest, fix_notes: str = "") -> dict:
         place=req.place.replace("_", " "),
         minutes=req.minutes,
         words=words,
+        theme=req.theme or "none",
     )
 
     request = "Write tonight's story."

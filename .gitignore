@@ -19,3 +19,4 @@ agent-api/try_*.py
 agent-api/audio/
 *.wav
 agent-api/music/*.mp3
+agent-api/evals/results.csv

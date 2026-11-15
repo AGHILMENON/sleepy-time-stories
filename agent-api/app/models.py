@@ -10,6 +10,7 @@ class StoryRequest(BaseModel):
     hero: Literal["elephant", "owl", "turtle", "bunny"]
     place: Literal["forest", "seaside", "starry_sky"]
     minutes: Literal[5, 10, 15]
+    theme: str | None = Field(default=None, max_length=120)
 
 
 class SafetyReview(BaseModel):
